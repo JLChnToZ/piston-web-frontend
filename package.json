@@ -1,0 +1,52 @@
+{
+  "name": "piston-web-frontend",
+  "version": "0",
+  "description": "Web frontend for Piston",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "webpack serve --open --config webpack.dev.js",
+    "build": "webpack --config webpack.prod.js"
+  },
+  "author": "Jeremy Lam \"JLChnToZ\" <jeremylam619@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "sideEffects": [
+    "./src/monaco-env.ts"
+  ],
+  "dependencies": {
+    "@fortawesome/fontawesome-free": "latest",
+    "@types/hyperscript": "latest",
+    "@types/i18next": "latest",
+    "@types/node": "latest",
+    "@types/resize-observer-browser": "latest",
+    "@types/webpack-env": "latest",
+    "hyperscript": "latest",
+    "linkify-it": "latest",
+    "monaco-editor": "latest",
+    "rxjs": "latest",
+    "string-argv": "latest",
+    "tocas-ui": "latest",
+    "tslib": "latest"
+  },
+  "devDependencies": {
+    "awesome-typescript-loader": "^5",
+    "clean-webpack-plugin": "^3",
+    "css-loader": "^3",
+    "eslint": "^7",
+    "eslint-config-prettier": "^6",
+    "eslint-plugin-prettier": "^3",
+    "file-loader": "^6",
+    "html-webpack-plugin": "^4",
+    "mini-css-extract-plugin": "^1",
+    "optimize-css-assets-webpack-plugin": "^5",
+    "source-map-loader": "^2",
+    "terser-webpack-plugin": "^5",
+    "typescript": "latest",
+    "typescript-eslint": "^0.0.1-alpha.0",
+    "webpack": "^5",
+    "webpack-cli": "^4",
+    "webpack-dev-server": "^3",
+    "webpack-merge": "^5",
+    "worker-loader": "^3"
+  }
+}

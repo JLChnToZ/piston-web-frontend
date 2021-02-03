@@ -1,0 +1,41 @@
+@import url('../node_modules/tocas-ui/dist/tocas.css');
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.main-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.editor-container {
+  overflow: hidden;
+}
+
+.main-container>* {
+  flex: auto;
+  margin: 0 !important;
+}
+
+.main-container>*.flex-fixed {
+  position: initial !important;
+  flex: none;
+}
+
+.view-lines * {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background: black;
+    color: white;
+  }
+}
