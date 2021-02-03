@@ -1,6 +1,13 @@
 import { concat, fromEvent, Observable } from 'rxjs';
 import { pluck, shareReplay } from 'rxjs/operators';
 
+export const emptyArray = Object.freeze({
+  length: 0,
+  [Symbol.toStringTag]: 'EmptyArray',
+  next() { return { done: true } as IteratorReturnResult<any>; },
+  [Symbol.iterator]() { return this; },
+}) as ArrayLike<any> & IterableIterator<any>;
+
 const mqObservables = new Map<string, Observable<boolean>>();
 export function observeMediaQuery(query: string) {
   let observable = mqObservables.get(query);
@@ -63,4 +70,21 @@ export function addEventListenerAndCache(
     return cacheList;
   }
   return [cacheEntry];
+}
+
+export function lazyInit<C extends new(...args: any[]) => any>(
+  Class: C,
+  args: ConstructorParameters<C> extends [] ?
+    [] | null | undefined :
+    ConstructorParameters<C>,
+  init?: (Partial<InstanceType<C>> & ThisType<InstanceType<C>>) | null,
+): InstanceType<C> {
+  return Object.assign(Reflect.construct(Class, args ?? emptyArray), init);
+}
+
+export function blob2Text(blob: Blob) {
+  return new Promise<string>((resolve, reject) => lazyInit<typeof FileReader>(FileReader, null, {
+    onload: ({ target }) => resolve(target?.result as string),
+    onerror: ({ target }) => reject(target?.error),
+  }).readAsText(blob));
 }

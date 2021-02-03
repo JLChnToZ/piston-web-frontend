@@ -33,6 +33,16 @@ html, body {
   font-family: 'Courier New', Courier, monospace;
 }
 
+.hidden {
+  position: fixed;
+  width: 0;
+  height: 0;
+  top: -1em;
+  left: -1em;
+  overflow: hidden;
+  pointer-events: none;
+}
+
 @media (prefers-color-scheme: dark) {
   body {
     background: black;
