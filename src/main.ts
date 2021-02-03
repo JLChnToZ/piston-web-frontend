@@ -206,5 +206,4 @@ observeMediaQuery('(prefers-color-scheme:dark)').subscribe(matches => {
         if (!mimeMap.has(mime))
           mimeMap.set(mime.toLowerCase(), lang.id);
   }
-  fileSelect.accept = [...mimeMap.keys(), ...extMap.keys()].join(',');
 })();
