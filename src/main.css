@@ -29,8 +29,17 @@ html, body {
   flex: none;
 }
 
-.view-lines * {
-  font-family: 'Courier New', Courier, monospace;
+/* Revert style conclict on monaco-editor and tocas-ui * selector. */
+.monaco-editor * {
+  letter-spacing: initial;
+}
+
+.monaco-editor .view-lines * {
+  font-family: var(--monaco-monospace-font), 'Courier New', Courier, monospace;
+}
+
+.monaco-editor .monaco-inputbox>.ibwrapper>.input {
+  font-family: var(--monaco-monospace-font);
 }
 
 .hidden {
@@ -41,6 +50,11 @@ html, body {
   left: -1em;
   overflow: hidden;
   pointer-events: none;
+}
+
+.ts.modal>.content.fitted {
+  padding: 0;
+  min-height: 50vh;
 }
 
 @media (prefers-color-scheme: dark) {

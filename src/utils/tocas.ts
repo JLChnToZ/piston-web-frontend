@@ -17,7 +17,14 @@ export async function showSnack(message: string, duration = 5000) {
   snackBar.addEventListener('animationend', () => snackBar.remove(), { once: true });
 }
 
-export function showModel(modal: HTMLDialogElement) {
+export interface ModalOptions {
+  approve?: string;
+  deny?: string;
+  onApprove?: (this: HTMLDialogElement) => boolean | void | undefined,
+  onDeny?: (this: HTMLDialogElement) => boolean | void | undefined,
+}
+
+export function showModal(modal: HTMLDialogElement, options: ModalOptions = {}) {
   const dimmer = modal.closest<HTMLElement>('.ts.modals.dimmer');
   if (!dimmer) return;
   const closeBtn = modal.querySelector('.close.icon');
@@ -33,7 +40,7 @@ export function showModel(modal: HTMLDialogElement) {
   });
   if (closeBtn)
     addEventListenerAndCache(cache, closeBtn, 'click', () => hideModel(modal));
-  bindModalButtons(modal);
+  bindModalButtons(modal, options.approve, options.deny, options.onApprove, options.onDeny);
   modal.open = true;
   modal.classList.add('opening');
   modal.addEventListener('animationend', e =>
@@ -69,8 +76,8 @@ function bindModalButtons(
   modal: HTMLDialogElement,
   approve: string = '.positive, .approve, .ok',
   deny: string = '.negative, .deny, .cancel',
-  approveCb: (this: HTMLDialogElement) => boolean | undefined = returnTrue,
-  denyCb: (this: HTMLDialogElement) => boolean | undefined = returnTrue,
+  approveCb: (this: HTMLDialogElement) => boolean | void | undefined = returnTrue,
+  denyCb: (this: HTMLDialogElement) => boolean | void | undefined = returnTrue,
 ) {
   const approveElm = modal.querySelectorAll(approve);
   const denyElm = modal.querySelectorAll(deny);
