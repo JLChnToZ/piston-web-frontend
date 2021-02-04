@@ -4690,8 +4690,7 @@ to-regex@^3.0.1, to-regex@^3.0.2:
 
 tocas-ui@latest:
   version "2.3.2"
-  resolved "https://registry.yarnpkg.com/tocas-ui/-/tocas-ui-2.3.2.tgz#bf05d809acee765eadf5447d4a318d23049f6782"
-  integrity sha512-PsbSbdN6JybaaKtL1kcl4QcZsIHBIE62t92i5NJikydb2ByfQPMRoiWBMoLmT5UP+L9g/VvC/TZK27iJ2uThMw==
+  resolved "https://codeload.github.com/teacat/tocas/tar.gz/85f81778d6a62ae47bb4c1a181aebe3772b9b899"
 
 toidentifier@1.0.0:
   version "1.0.0"

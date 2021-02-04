@@ -66,18 +66,19 @@ editor.addAction({
 editor.addAction({
   id: 'new',
   label: 'Clear',
+  keybindings: [KeyMod.CtrlCmd | KeyCode.KEY_N],
   run: clear,
 });
 editor.addAction({
   id: 'open',
   label: 'Open',
-  keybindings: [KeyMod.CtrlCmd, KeyCode.KEY_O],
+  keybindings: [KeyMod.CtrlCmd | KeyCode.KEY_O],
   run: load,
 });
 editor.addAction({
   id: 'save',
   label: 'Save',
-  keybindings: [KeyMod.CtrlCmd, KeyCode.KEY_S],
+  keybindings: [KeyMod.CtrlCmd | KeyCode.KEY_S],
   run: save,
 });
 

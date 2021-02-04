@@ -1,4 +1,4 @@
-@import url('../node_modules/tocas-ui/dist/tocas.css');
+@import url('./patched/tocas.css');
 
 html, body {
   width: 100%;
@@ -27,19 +27,6 @@ html, body {
 .main-container>*.flex-fixed {
   position: initial !important;
   flex: none;
-}
-
-/* Revert style conclict on monaco-editor and tocas-ui * selector. */
-.monaco-editor * {
-  letter-spacing: initial;
-}
-
-.monaco-editor .view-lines * {
-  font-family: var(--monaco-monospace-font), 'Courier New', Courier, monospace;
-}
-
-.monaco-editor .monaco-inputbox>.ibwrapper>.input {
-  font-family: var(--monaco-monospace-font);
 }
 
 .hidden {
