@@ -55,6 +55,7 @@ const editor = Editor.create(container.appendChild(h<HTMLDivElement>('code.unsty
   wordWrap: 'on',
   minimap: { enabled: true },
   folding: true,
+  fontFamily: 'TypoPRO Mononoki',
 });
 
 editor.addAction({
@@ -90,9 +91,10 @@ const stdinEditor = Editor.create(stdinDialog.querySelector<HTMLDivElement>('div
   wordWrap: 'on',
   minimap: { enabled: true },
   folding: true,
+  fontFamily: 'TypoPRO Mononoki',
 });
 
-const argsInput = h<HTMLInputElement>('input', { type: 'text', placeholder: 'Arguments...', spellcheck: false });
+const argsInput = h<HTMLInputElement>('input.monospace', { type: 'text', placeholder: 'Arguments...', spellcheck: false });
 
 const languageSelector = h<HTMLSelectElement>('select.ts.item.basic.dropdown', {
   onchange: (e: Event) => {

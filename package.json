@@ -20,6 +20,7 @@
     "@types/node": "latest",
     "@types/resize-observer-browser": "latest",
     "@types/webpack-env": "latest",
+    "@typopro/web-mononoki": "latest",
     "hyperscript": "latest",
     "linkify-it": "latest",
     "monaco-editor": "latest",

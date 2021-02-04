@@ -175,6 +175,11 @@
     "@types/webpack-sources" "*"
     source-map "^0.6.0"
 
+"@typopro/web-mononoki@latest":
+  version "3.7.5"
+  resolved "https://registry.yarnpkg.com/@typopro/web-mononoki/-/web-mononoki-3.7.5.tgz#0a48c87a97ec4ed2de8c60b6e21ce4744b517674"
+  integrity sha512-s8bUD8e7hjPJH9sqCGFGvNxUI7u2mMq/D8hCCLBrAtzGbYqkqL0cVQgAfCEis+LQxMmuMpHA0g/Q51tnQEe41A==
+
 "@webassemblyjs/ast@1.11.0":
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.11.0.tgz#a5aa679efdc9e51707a4207139da57920555961f"
