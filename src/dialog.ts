@@ -44,21 +44,27 @@ export abstract class DialogWindow {
       this.bodyElement = h('div.window-body.expand'),
     );
     document.body.appendChild(this.dialog);
-    this.dialog.addEventListener('focusin', () => {
-      this.dialog.style.zIndex = (getMaxZIndex() + 1).toString();
-    }, true);
+    this.dialog.addEventListener('focusin', () => this.bringToTop(), true);
   }
 
   show() {
     this.dialog.classList.remove('hidden');
-    this.dialog.style.zIndex = (getMaxZIndex() + 1).toString();
+    this.bringToTop();
     onScreenDialogs.add(this);
+  }
+
+  bringToTop() {
+    this.dialog.style.zIndex = (getMaxZIndex() + 1).toString();
+    for (const { titleElement } of onScreenDialogs)
+      titleElement.classList.add('inactive');
+    this.titleElement.classList.remove('inactive');
   }
 
   protected minimizeClick() {}
 
   protected maximizeClick() {
-    this.dialog.classList.toggle('maximized');
+    const isMaximized = this.dialog.classList.toggle('maximized');
+    this.maximizeButton?.setAttribute('aria-label', isMaximized ? 'Restore' : 'Maximize');
   }
 
   close() {
