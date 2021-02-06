@@ -9,7 +9,7 @@ export class ResultDialog extends DialogWindow {
 
   constructor() {
     super({
-      titleText: 'Executeion Result',
+      titleText: 'Execution Result',
       closeButton: true,
     });
     this.bodyElement.classList.add('borderless');
