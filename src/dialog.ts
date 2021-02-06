@@ -45,6 +45,7 @@ export abstract class DialogWindow {
     );
     document.body.appendChild(this.dialog);
     this.dialog.addEventListener('focusin', () => this.bringToTop(), true);
+    this.dialog.addEventListener('click', () => this.bringToTop(), true);
   }
 
   show() {
@@ -91,6 +92,10 @@ function getMaxZIndex() {
 registerDraggableElements('.window>.title-bar', '.window', element => {
   const maxZIndex = getMaxZIndex();
   const win = element.closest<HTMLElement>('.window');
-  if (win != null && Number(win.style.zIndex) < maxZIndex)
+  if (win == null) return;
+  if (Number(win.style.zIndex) < maxZIndex)
     win.style.zIndex = (maxZIndex + 1).toString(10);
+  for (const { titleElement } of onScreenDialogs)
+    titleElement.classList.add('inactive');
+  element.classList.remove('inactive');
 }, undefined, document.body);
