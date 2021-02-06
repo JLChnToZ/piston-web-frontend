@@ -1,23 +1,75 @@
-@import url('./patched/tocas.css');
+@import url('../node_modules/normalize.css/normalize.css');
+@import url('../node_modules/98.css/dist/98.css');
 @import url('../node_modules/@typopro/web-mononoki/TypoPRO-Mononoki.css');
 
 html, body {
   width: 100%;
   height: 100%;
-  margin: 0;
-  border: 0;
-  padding: 0;
+}
+body {
+  user-select: none;
   overflow: hidden;
+}
+.flex {
+  display: flex;
+}
+.flex.horizontal {
+  flex-direction: row;
+}
+.flex.horizontal.reverse {
+  flex-direction: row-reverse;
+}
+.flex.vertical {
+  flex-direction: column;
+}
+.flex.vertical.reverse {
+  flex-direction: column-reverse;
+}
+.flex.nowrap {
+  flex-wrap: nowrap;
+}
+.flex.wrap {
+  flex-wrap: wrap;
+}
+.flex.wrap.reverse {
+  flex-wrap: wrap-reverse;
+}
+.flex>.expand {
+  flex: auto;
+}
+.flex>.fixed {
+  flex: none;
+}
+.filled {
+  width: 100%;
+  height: 100%;
+}
+nav.flex.window>* {
+  min-width: 0;
+  margin: 2px;
+}
+.hidden, .flex.hidden {
+  display: none;
+}
+.floating {
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+.field-row.align-right {
+  justify-content: flex-end;
+}
+
+.window .window-body.borderless {
+  margin: 0;
+}
+
+.window>.window-body.borderless>textarea {
+  min-width: 240px;
 }
 
 samp, pre, code, .monospace {
   font-family: 'TypoPRO Mononoki', 'Courier New', Courier, monospace;
-}
-
-.main-container {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
 }
 
 .editor-container {
@@ -54,4 +106,15 @@ samp, pre, code, .monospace {
     background: black;
     color: white;
   }
+}
+
+.window.maximized {
+  transform: initial !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
 }

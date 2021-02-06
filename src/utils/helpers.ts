@@ -88,3 +88,9 @@ export function blob2Text(blob: Blob) {
     onerror: ({ target }) => reject(target?.error),
   }).readAsText(blob));
 }
+
+export function interceptEvent(e: Event) {
+  if(e.cancelable && !e.defaultPrevented)
+    e.preventDefault();
+  e.stopPropagation();
+}

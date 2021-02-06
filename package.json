@@ -14,7 +14,7 @@
     "./src/monaco-env.ts"
   ],
   "dependencies": {
-    "@fortawesome/fontawesome-free": "latest",
+    "98.css": "latest",
     "@types/hyperscript": "latest",
     "@types/i18next": "latest",
     "@types/node": "latest",
@@ -23,10 +23,10 @@
     "@typopro/web-mononoki": "latest",
     "hyperscript": "latest",
     "linkify-it": "latest",
-    "monaco-editor": "latest",
+    "monaco-editor": "^0.22",
+    "normalize.css": "latest",
     "rxjs": "latest",
     "string-argv": "latest",
-    "tocas-ui": "latest",
     "tslib": "latest"
   },
   "devDependencies": {
@@ -39,6 +39,7 @@
     "file-loader": "^6",
     "html-webpack-plugin": "^4",
     "mini-css-extract-plugin": "^1",
+    "monaco-editor-webpack-plugin": "^3",
     "optimize-css-assets-webpack-plugin": "^5",
     "source-map-loader": "^2",
     "terser-webpack-plugin": "^5",

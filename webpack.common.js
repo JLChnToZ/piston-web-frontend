@@ -22,6 +22,14 @@ const HTMLWebpackPluginConfig = new HtmlWebpackPlugin({
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const CleanupPluginConfig = new CleanWebpackPlugin({});
 
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const MonacoWebpackPluginConfig = new MonacoWebpackPlugin({
+  languages: [
+    'shell', 'c', 'cpp', 'csharp', 'go', 'java', 'julia', 'kotlin', 'lua', 'javascript',
+    'perl', 'php', 'python', 'ruby', 'rust', 'swift', 'typescript',
+  ]
+});
+
 //merge() isn't required, but it enables autocomplete
 module.exports = merge({
   entry: {
@@ -40,6 +48,7 @@ module.exports = merge({
     CleanupPluginConfig,
     HTMLWebpackPluginConfig,
     MiniCssExtractPluginConfig,
+    MonacoWebpackPluginConfig,
   ],
 
   module: {

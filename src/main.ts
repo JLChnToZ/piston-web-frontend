@@ -1,4 +1,4 @@
-import './monaco-env';
+// import './monaco-env';
 import h from 'hyperscript';
 import 'rxjs';
 import { ajax, AjaxError } from 'rxjs/ajax';
@@ -6,7 +6,8 @@ import { editor as Editor, KeyCode, KeyMod, languages as Languages } from 'monac
 import stringArgv from 'string-argv';
 import { PistonExecuteRequest, PistonExecuteResponse, PistonVersions } from './schema';
 import { blob2Text, observeMediaQuery } from './utils/helpers';
-import { showModal, showSnack } from './utils/tocas';
+import { StdinDialog } from './stdin-dialog';
+import { ResultDialog } from './result-dialog';
 
 const pistonPublicURL = (self as any).pistonPublicURL || 'https://emkc.org/api/v1/piston/';
 let currentLanguage = 'node';
@@ -35,19 +36,9 @@ const langInfoMap = new Map<string, Languages.ILanguageExtensionPoint>();
 const extMap = new Map<string, string>();
 const mimeMap = new Map<string, string>();
 
-const container = document.body.appendChild(h<HTMLFormElement>('form.main-container'));
-const spinner = document.body.appendChild(h<HTMLDivElement>('div.ts.dimmer', h('div.ts.big.loader')));
-const dialogContainer = document.body.appendChild(h<HTMLDivElement>('div.ts.modals.dimmer'));
-const stdinDialog = dialogContainer.appendChild(h<HTMLDialogElement>('dialog.ts.closable.modal',
-  h('div.header', 'Edit User Input (STDIN)'),
-  h('div.content.fitted'),
-  h('div.actions',
-    h('button.ts.positive.button', 'Apply'),
-    h('button.ts.negative.button', 'Cancel'),
-  ),
-));
+const container = document.body.appendChild(h<HTMLFormElement>('form.filled.flex.vertical'));
 
-const editor = Editor.create(container.appendChild(h<HTMLDivElement>('code.unstyled.editor-container')), {
+const editor = Editor.create(container.appendChild(h<HTMLDivElement>('div.expand.editor-container')), {
   language: 'javascript',
   value: '',
   automaticLayout: true,
@@ -83,20 +74,11 @@ editor.addAction({
   run: save,
 });
 
-const stdinEditor = Editor.create(stdinDialog.querySelector<HTMLDivElement>('div.content')!, {
-  language: 'plaintext',
-  value: '',
-  automaticLayout: true,
-  selectOnLineNumbers: true,
-  wordWrap: 'on',
-  minimap: { enabled: true },
-  folding: true,
-  fontFamily: 'TypoPRO Mononoki',
-});
+const stdinDialog = new StdinDialog();
 
-const argsInput = h<HTMLInputElement>('input.monospace', { type: 'text', placeholder: 'Arguments...', spellcheck: false });
+const argsInput = h<HTMLInputElement>('input.expand.monospace', { type: 'text', placeholder: 'Arguments...', spellcheck: false });
 
-const languageSelector = h<HTMLSelectElement>('select.ts.item.basic.dropdown', {
+const languageSelector = h<HTMLSelectElement>('select.fixed', {
   onchange: (e: Event) => {
     const newLanguage = (e.target as HTMLSelectElement).value;
     if (currentLanguage === newLanguage)
@@ -105,8 +87,7 @@ const languageSelector = h<HTMLSelectElement>('select.ts.item.basic.dropdown', {
     currentLanguage = newLanguage;
     argsInput.value = '';
   },
-  'data-tooltip': 'Language (Runtime to use)',
-  'data-tooltip-position': 'top center',
+  title: 'Language (Runtime to use)'
 });
 
 const fileSelect = h<HTMLInputElement>('input.hidden', {
@@ -152,18 +133,16 @@ function save() {
 }
 
 function editStdin() {
-  stdinEditor.setValue(stdin ?? '');
-  showModal(stdinDialog, { onApprove: applyStdin, onDeny: editorFocus });
-  stdinEditor.focus();
+  stdinDialog.showAndWait(stdin).then(newValue => stdin = newValue);
 }
 
 function execute() {
+  console.trace('Triggered execute');
   container.requestSubmit();
 }
 
 async function loadHandle(file: File) {
   try {
-    spinner.classList.add('active');
     const model = Editor.createModel(await blob2Text(file));
     editor.getModel()?.dispose();
     editor.setModel(model);
@@ -183,57 +162,28 @@ async function loadHandle(file: File) {
     if (!sameLang && currentLanguage !== targetLang)
       languageSelector.value = currentLanguage = targetLang;
   } catch(e) {
-    showSnack(e.message || String(e));
   } finally {
-    spinner.classList.remove('active');
     editor.focus();
   }
 }
 
-container.appendChild(h('div.ts.flex-fixed.bottom.fixed.icon.tiny.menu',
-  h('a.item', { onclick: (e: Event) => {
-    e.preventDefault();
-    clear();
-  }, 'data-tooltip': 'Clear', 'data-tooltip-position': 'top center' }, h('i.file.outline.icon')),
-  h('a.item', { onclick: (e: Event) => {
-    e.preventDefault();
-    load();
-  }, 'data-tooltip': 'Open', 'data-tooltip-position': 'top center' }, h('i.folder.open.icon')),
-  h('a.item', { onclick: (e: Event) => {
-    e.preventDefault();
-    save();
-  }, 'data-tooltip': 'Save (Download)', 'data-tooltip-position': 'top center' }, h('i.save.icon')),
+container.appendChild(h('nav.window.flex',
+  h('button.fixed', { type: 'reset', onclick: clear, title: 'Clear everything' }, 'New'),
+  h('button.fixed', { type: 'button', onclick: load, title: 'Open from your computer' }, 'Open'),
+  h('button.fixed', { type: 'button', onclick: save, title: 'Download and save your works' }, 'Save'),
   languageSelector,
-  h('div.stretched.vertically.fitted.item', h('div.ts.fluid.borderless.basic.mini.input', argsInput)),
-  h('a.item', { onclick: (e: Event) => {
-    e.preventDefault();
-    editStdin();
-  }, 'data-tooltip': 'User Input (STDIN)', 'data-tooltip-position': 'top center' }, h('i.keyboard.icon')),
-  h('a.item', { onclick: (e: Event) => {
-    e.preventDefault();
-    execute();
-  }, 'data-tooltip': 'Execute', 'data-tooltip-position': 'top center' }, h('i.play.icon')),
-));
-
-function applyStdin() {
-  stdin = stdinEditor.getModel()?.getValue(Editor.EndOfLinePreference.LF) || undefined;
-  editorFocus();
-}
-
-function editorFocus() {
-  editor.focus();
-}
-
-const resultDisplay = dialogContainer.appendChild(h<HTMLDialogElement>('dialog.ts.closable.modal',
-  h('div.header', 'Execution Result'),
-  h('div.content', h('div.description', h('div.ts.segment', h('samp')))),
-  h('div.actions', h('button.ts.positive.button', 'Close')),
+  argsInput,
+  h('button.fixed', { type: 'button', onclick: editStdin, title: 'Edit STDIN' }, 'STDIN...'),
+  h('button.fixed', { type: 'submit', title: 'Execute' }, 'Run'),
 ));
 
 container.addEventListener('submit', async e => {
+  const formElements = container.querySelectorAll<HTMLInputElement | HTMLButtonElement | HTMLSelectElement | HTMLTextAreaElement>(
+    'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled])',
+  );
   try {
     e.preventDefault();
-    spinner.classList.add('active');
+    formElements.forEach(e => e.disabled = true);
     const result: PistonExecuteResponse = (await ajax({
       method: 'POST',
       url: new URL('execute', pistonPublicURL).toString(),
@@ -245,35 +195,28 @@ container.addEventListener('submit', async e => {
         stdin,
       } as PistonExecuteRequest),
     }).toPromise()).response;
-    const body = resultDisplay.querySelector<HTMLElement>('.content samp')!;
-    body.textContent = '';
-    const frag = document.createDocumentFragment();
-    for (const line of result.output.split('\n'))
-      frag.append(line, document.createElement('br'));
-    body.appendChild(frag);
-    showModal(resultDisplay, { onApprove: editorFocus, onDeny: editorFocus });
+    const resultDisplay = new ResultDialog();
+    resultDisplay.text = result.output;
+    resultDisplay.show();
   } catch (e) {
+    let message = 'Unknown Error';
     if (e instanceof AjaxError)
-      showSnack(`${e.message}: ${e.response?.message ?? ''}`);
+      message = `${e.message}: ${e.response?.message ?? ''}`;
     else if (e instanceof Error)
-      showSnack(e.message);
-    else {
-      showSnack('Unknown Error');
+      message = e.message;
+    else
       console.error(e);
-    }
+    const resultDisplay = new ResultDialog();
+    resultDisplay.text = message;
+    resultDisplay.show();
   } finally {
-    spinner.classList.remove('active');
+    formElements.forEach(e => e.disabled = false);
     editor.focus();
   }
 });
 
 observeMediaQuery('(prefers-color-scheme:dark)').subscribe(matches => {
-  document.querySelectorAll('.ts:not(.dimmer)').forEach(element =>
-    element.classList[matches ? 'add' : 'remove']('inverted'),
-  );
-  const theme = matches ? 'vs-dark': 'vs';
-  editor.updateOptions({ theme });
-  stdinEditor.updateOptions({ theme });
+  editor.updateOptions({ theme:  matches ? 'vs-dark': 'vs' });
 });
 
 (async() => {
