@@ -16,14 +16,18 @@ export function registerDraggableElements(
   const dragElements = new Map<number, DraggingState>();
   root.addEventListener('pointerdown', e => {
     if (!(e.target instanceof HTMLElement) ||
-      dragElements.has(e.pointerId) ||
-      !e.target.matches(`${draggableSelector}, ${draggableSelector} *`) ||
-      dragHandler?.(e.target as HTMLElement) === false)
+      dragElements.has(e.pointerId))
       return;
+    let oTarget = e.target;
+    if (oTarget.matches(`${draggableSelector} *`))
+      oTarget = oTarget.closest<HTMLElement>(draggableSelector)!;
+    else if (!oTarget.matches(draggableSelector))
+      return;
+    if (!dragHandler?.(oTarget) === false) return;
     interceptEvent(e);
     const target = containerSelector &&
-      e.target.closest<HTMLElement>(containerSelector) ||
-      e.target;
+      oTarget.closest<HTMLElement>(containerSelector) ||
+      oTarget;
     const [x, y] = getTransformOffset(target);
     dragElements.set(e.pointerId, {
       t: target,
