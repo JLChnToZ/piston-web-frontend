@@ -11,12 +11,15 @@ export class ResultDialog extends DialogWindow {
     super({
       titleText: 'Execution Result',
       closeButton: true,
+      maximizeButton: true,
+      resizable: true,
     });
-    this.bodyElement.classList.add('borderless');
-    this.contentElement = this.bodyElement.appendChild(h('textarea.monospace', { readOnly: true, spellCheck: false }));
+    this.dialog.style.minWidth = '240px';
+    this.dialog.style.minHeight = '240px';
+    this.bodyElement.replaceWith(
+      this.contentElement = h('textarea.expand.monospace', { readOnly: true, spellCheck: false }),
+    );
   }
-  
-  protected maximizeClick() {}
 
   close() {
     super.close();

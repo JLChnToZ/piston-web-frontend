@@ -22,6 +22,8 @@ export class StdinDialog extends DialogWindow {
     super({
       titleText: 'Edit STDIN',
       closeButton: true,
+      maximizeButton: true,
+      resizable: true,
     });
     this.dialog.style.minWidth = '50%';
     this.dialog.style.minHeight = '50%';
@@ -62,8 +64,6 @@ export class StdinDialog extends DialogWindow {
       delete this.resolve;
     }
   }
-
-  protected maximizeClick() {}
 
   close() {
     super.close();

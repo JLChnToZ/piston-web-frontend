@@ -1,11 +1,12 @@
 import h from 'hyperscript';
-import { registerDraggableElements } from './utils/dnd-helper';
+import { DraggingState, HTMLDraggableHandler, HTMLResizeDraggableHandler, Pointer } from './utils/dnd-helper';
 
 export interface DialogWindowOptions {
   titleText?: string | Node,
   closeButton?: boolean;
   maximizeButton?: boolean;
   minimizeButton?: boolean;
+  resizable?: boolean;
 }
 
 const onScreenDialogs = new Set<DialogWindow>();
@@ -18,6 +19,8 @@ export abstract class DialogWindow {
   maximizeButton?: HTMLButtonElement;
   minimizeButton?: HTMLButtonElement;
   closeButton?: HTMLButtonElement;
+  private _w?: number;
+  private _h?: number;
 
   constructor(options: DialogWindowOptions = { closeButton: true }) {
     this.dialog = h('div.window.flex.vertical.floating.hidden',
@@ -43,6 +46,21 @@ export abstract class DialogWindow {
       ),
       this.bodyElement = h('div.window-body.expand'),
     );
+    if (options.resizable) {
+      this.dialog.classList.add('reiszable');
+      const frag = document.createDocumentFragment();
+      frag.append(
+        h('div.resize-handle.dir-e'),
+        h('div.resize-handle.dir-se'),
+        h('div.resize-handle.dir-s'),
+        h('div.resize-handle.dir-sw'),
+        h('div.resize-handle.dir-w'),
+        h('div.resize-handle.dir-nw'),
+        h('div.resize-handle.dir-n'),
+        h('div.resize-handle.dir-ne'),
+      );
+      this.dialog.insertBefore(frag, this.titleElement);
+    }
     document.body.appendChild(this.dialog);
     this.dialog.addEventListener('focusin', () => this.bringToTop(), true);
     this.dialog.addEventListener('click', () => this.bringToTop(), true);
@@ -64,8 +82,16 @@ export abstract class DialogWindow {
   protected minimizeClick() {}
 
   protected maximizeClick() {
+    const { width, height } = this.dialog.getBoundingClientRect();
     const isMaximized = this.dialog.classList.toggle('maximized');
     this.maximizeButton?.setAttribute('aria-label', isMaximized ? 'Restore' : 'Maximize');
+    if (isMaximized) {
+      this._w = width;
+      this._h = height;
+    } else {
+      if (this._w != null) this.dialog.style.width = `${this._w}px`;
+      if (this._h != null) this.dialog.style.height = `${this._h}px`;
+    }
   }
 
   close() {
@@ -89,13 +115,29 @@ function getMaxZIndex() {
   return maxZIndex;
 }
 
-registerDraggableElements('.window>.title-bar', '.window', element => {
+new (class extends HTMLDraggableHandler {
+  dragStart(e: Pointer, target: HTMLElement) {
+    const state = super.dragStart(e, target);
+    bringToTopStartDrag(target);
+    return state;
+  }
+})('.window>.title-bar', '.window', document.body);
+
+new (class extends HTMLResizeDraggableHandler {
+  dragStart(e: Pointer, target: HTMLElement, oTarget: HTMLElement) {
+    const state = super.dragStart(e, target, oTarget);
+    bringToTopStartDrag(target);
+    return state;
+  }
+})('.window:not(.maximized)>.resize-handle', '.window', document.body);
+
+function bringToTopStartDrag(target: HTMLElement) {
   const maxZIndex = getMaxZIndex();
-  const win = element.closest<HTMLElement>('.window');
+  const win = target.closest<HTMLElement>('.window');
   if (win == null) return;
   if (Number(win.style.zIndex) < maxZIndex)
     win.style.zIndex = (maxZIndex + 1).toString(10);
   for (const { titleElement } of onScreenDialogs)
     titleElement.classList.add('inactive');
-  element.classList.remove('inactive');
-}, undefined, document.body);
+  target.querySelector('.title-bar')?.classList.remove('inactive');
+}
