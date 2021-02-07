@@ -119,7 +119,15 @@ new (class extends HTMLDraggableHandler {
   dragStart(e: Pointer, target: HTMLElement) {
     const state = super.dragStart(e, target);
     bringToTopStartDrag(target);
+    target.classList.add('dragging');
     return state;
+  }
+  dragEnd(e: Pointer, { t }: DraggingState<HTMLElement>) {
+    t.classList.remove('dragging');
+  }
+  dragCancel(e: Pointer, state: DraggingState<HTMLElement>) {
+    super.dragCancel(e, state);
+    state.t.classList.remove('dragging');
   }
 })('.window>.title-bar', '.window', document.body);
 
@@ -127,7 +135,15 @@ new (class extends HTMLResizeDraggableHandler {
   dragStart(e: Pointer, target: HTMLElement, oTarget: HTMLElement) {
     const state = super.dragStart(e, target, oTarget);
     bringToTopStartDrag(target);
+    target.classList.add('dragging');
     return state;
+  }
+  dragEnd(e: Pointer, { t }: DraggingState<HTMLElement>) {
+    t.classList.remove('dragging');
+  }
+  dragCancel(e: Pointer, state: DraggingState<HTMLElement>) {
+    super.dragCancel(e, state);
+    state.t.classList.remove('dragging');
   }
 })('.window:not(.maximized)>.resize-handle', '.window', document.body);
 
