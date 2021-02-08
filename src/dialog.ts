@@ -9,7 +9,7 @@ export interface DialogWindowOptions {
   resizable?: boolean;
 }
 
-const onScreenDialogs = new Set<DialogWindow>();
+const onScreenDialogs = new Map<HTMLElement, DialogWindow>();
 
 export abstract class DialogWindow {
   dialog: HTMLDivElement;
@@ -19,6 +19,7 @@ export abstract class DialogWindow {
   maximizeButton?: HTMLButtonElement;
   minimizeButton?: HTMLButtonElement;
   closeButton?: HTMLButtonElement;
+  isFocused?: boolean;
   private _x?: number;
   private _y?: number;
   private _w?: number;
@@ -64,21 +65,36 @@ export abstract class DialogWindow {
       this.dialog.insertBefore(frag, this.titleElement);
     }
     document.body.appendChild(this.dialog);
-    this.dialog.addEventListener('focusin', () => this.bringToTop(), true);
-    this.dialog.addEventListener('click', () => this.bringToTop(), true);
+    this.dialog.addEventListener('focusin', () => this.focus(), true);
+    this.dialog.addEventListener('click', () => this.focus(), true);
   }
 
   show() {
-    this.dialog.classList.remove('hidden');
-    this.bringToTop();
-    onScreenDialogs.add(this);
+    const { classList } = this.dialog;
+    if (classList.contains('hidden')) {
+      if (classList.contains('maximized'))
+        this.maximizeClick();
+      if (classList.contains('minimized'))
+        this.minimizeClick();
+      classList.remove('hidden');
+    }
+    this.focus();
+    onScreenDialogs.set(this.dialog, this);
   }
 
-  bringToTop() {
-    this.dialog.style.zIndex = (getMaxZIndex() + 1).toString();
-    for (const { titleElement } of onScreenDialogs)
-      titleElement.classList.add('inactive');
-    this.titleElement.classList.remove('inactive');
+  focus() {
+    let maxZIndex = 0;
+    for (const handler of onScreenDialogs.values()) {
+      if (handler === this) continue;
+      const { dialog } = handler;
+      if (dialog.classList.contains('hidden'))
+        continue;
+      handler.blur();
+      maxZIndex = Math.max(Number(dialog.style.zIndex) || 0, maxZIndex);
+    }
+    if (Number(this.dialog.style.zIndex || 0) < maxZIndex)
+      this.dialog.style.zIndex = (maxZIndex + 1).toString();
+    if (!this.isFocused) this.onfocus();
   }
 
   protected minimizeClick() {
@@ -120,23 +136,46 @@ export abstract class DialogWindow {
 
   close() {
     this.dialog.classList.add('hidden');
-    onScreenDialogs.delete(this);
+    onScreenDialogs.delete(this.dialog);
+    this.isFocused = false;
+    let maxZIndex = Number.NEGATIVE_INFINITY;
+    let topElement: DialogWindow | undefined;
+    for (const handler of onScreenDialogs.values()) {
+      const { dialog } = handler;
+      if (dialog.classList.contains('hidden'))
+        continue;
+      const zIndex = Number(dialog.style.zIndex || 0);
+      if (zIndex <= maxZIndex)
+        continue;
+      maxZIndex = zIndex;
+      topElement = handler;
+    }
+    topElement?.onfocus();
+  }
+
+  protected onfocus() {
+    this.titleElement.classList.remove('inactive');
+    this.isFocused = true;
+  }
+
+  blur() {
+    this.titleElement.classList.add('inactive');
+    this.isFocused = false;
+    const { activeElement } = document;
+    if (!(activeElement instanceof HTMLElement)) return;
+    for (let e: HTMLElement | null = activeElement;
+      e != null;
+      e = e.parentElement)
+      if (e === this.dialog) {
+        activeElement.blur();
+        break;
+      }
   }
 
   dispose() {
     this.dialog.remove();
-    onScreenDialogs.delete(this);
+    onScreenDialogs.delete(this.dialog);
   }
-}
-
-function getMaxZIndex() {
-  let maxZIndex = 0;
-  for (const { dialog } of onScreenDialogs) {
-    if (dialog.classList.contains('hidden'))
-      continue;
-    maxZIndex = Math.max(Number(dialog.style.zIndex) || 0, maxZIndex);
-  }
-  return maxZIndex;
 }
 
 new (class extends HTMLDraggableHandler {
@@ -172,12 +211,6 @@ new (class extends HTMLResizeDraggableHandler {
 })('.window:not(.maximized)>.resize-handle', '.window', document.body);
 
 function bringToTopStartDrag(target: HTMLElement) {
-  const maxZIndex = getMaxZIndex();
-  const win = target.closest<HTMLElement>('.window');
-  if (win == null) return;
-  if (Number(win.style.zIndex) < maxZIndex)
-    win.style.zIndex = (maxZIndex + 1).toString(10);
-  for (const { titleElement } of onScreenDialogs)
-    titleElement.classList.add('inactive');
-  target.querySelector('.title-bar')?.classList.remove('inactive');
+  const dialog = target.closest<HTMLElement>('.window');
+  if (dialog) onScreenDialogs.get(dialog)?.focus();
 }

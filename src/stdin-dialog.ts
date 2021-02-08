@@ -74,6 +74,11 @@ export class StdinDialog extends DialogWindow {
     }
   }
 
+  protected onfocus() {
+    super.onfocus();
+    this.editor.focus();
+  }
+
   dispose() {
     this.editor.getModel()?.dispose();
     this.editor.dispose();
