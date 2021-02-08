@@ -175,6 +175,8 @@ samp, pre, code, .monospace {
 }
 
 .title-bar-text {
+  overflow: hidden;
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
 
@@ -202,10 +204,10 @@ samp, pre, code, .monospace {
 }
 
 .window.minimized {
-  width: fit-content !important;
+  width: 180px !important;
   height: fit-content !important;
-  max-width: 240px !important;
-  min-width: min-content !important;
+  min-width: 180px !important;
+  max-width: 180px !important;
   min-height: min-content !important;
 }
 
