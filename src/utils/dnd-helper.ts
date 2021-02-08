@@ -30,9 +30,10 @@ export interface Pointer {
   clientY: number;
 }
 
+const dragging = new WeakSet<Element>();
+
 export abstract class AbstractDraggableHandler<T extends Element, S extends DraggingState<T> = DraggingState<T>> {
   private dragState = new Map<number, S>();
-  private dragging = new WeakSet<T>();
 
   constructor(
     private draggableSelector: string,
@@ -114,7 +115,7 @@ export abstract class AbstractDraggableHandler<T extends Element, S extends Drag
   protected abstract checkType(target: unknown): target is T;
 
   protected isHandling(target: T) {
-    return this.dragging.has(target);
+    return dragging.has(target);
   }
 
   protected register(e: Pointer, target: S extends DraggingState<infer Q> ? Q : T, offsetX: number, offsetY: number) {
@@ -124,13 +125,13 @@ export abstract class AbstractDraggableHandler<T extends Element, S extends Drag
       y: e.clientY - offsetY,
     };
     this.dragState.set(e.pointerId, state as S);
-    this.dragging.add(target);
+    dragging.add(target);
     return state as S;
   }
 
   protected unregister(e: Pointer, { t }: S = this.dragState.get(e.pointerId)!) {
     this.dragState.delete(e.pointerId);
-    this.dragging.delete(t);
+    dragging.delete(t);
   }
 
   protected abstract dragStart(e: Pointer, target: T, dragTarget: T): void;

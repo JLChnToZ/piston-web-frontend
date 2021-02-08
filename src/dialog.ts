@@ -19,6 +19,8 @@ export abstract class DialogWindow {
   maximizeButton?: HTMLButtonElement;
   minimizeButton?: HTMLButtonElement;
   closeButton?: HTMLButtonElement;
+  private _x?: number;
+  private _y?: number;
   private _w?: number;
   private _h?: number;
 
@@ -79,18 +81,40 @@ export abstract class DialogWindow {
     this.titleElement.classList.remove('inactive');
   }
 
-  protected minimizeClick() {}
+  protected minimizeClick() {
+    const [x, y] = HTMLDraggableHandler.getTransformOffset(this.dialog);
+    const { width, height } = this.dialog.getBoundingClientRect();
+    const isMinimized = this.dialog.classList.toggle('minimized');
+    const isMaximized = this.dialog.classList.contains('maximized');
+    if (isMinimized) this.maximizeButton?.setAttribute('aria-label', 'Maximize');
+    this.minimizeButton?.setAttribute('aria-label', isMinimized ? 'Restore' : 'Minimize');
+    if (!isMinimized && !isMaximized) {
+      if (this._w != null) this.dialog.style.width = `${this._w}px`;
+      if (this._h != null) this.dialog.style.height = `${this._h}px`;
+      HTMLDraggableHandler.setTransformOffset(this.dialog, this._x ?? 0, this._y ?? 0);
+    } else if (isMinimized) {
+      this.dialog.classList.remove('maximized');
+      this._w = width;
+      this._h = height;
+      this._x = x;
+      this._y = y;
+      HTMLDraggableHandler.setTransformOffset(this.dialog, 0, 0);
+    }
+  }
 
   protected maximizeClick() {
     const { width, height } = this.dialog.getBoundingClientRect();
     const isMaximized = this.dialog.classList.toggle('maximized');
+    const isMinimized = this.dialog.classList.contains('minimized');
+    if (isMaximized) this.minimizeButton?.setAttribute('aria-label', 'Minimize');
     this.maximizeButton?.setAttribute('aria-label', isMaximized ? 'Restore' : 'Maximize');
-    if (isMaximized) {
-      this._w = width;
-      this._h = height;
-    } else {
+    if (!isMinimized && !isMaximized) {
       if (this._w != null) this.dialog.style.width = `${this._w}px`;
       if (this._h != null) this.dialog.style.height = `${this._h}px`;
+    } else if (isMaximized) {
+      this.dialog.classList.remove('minimized');
+      this._w = width;
+      this._h = height;
     }
   }
 
@@ -129,7 +153,7 @@ new (class extends HTMLDraggableHandler {
     super.dragCancel(e, state);
     state.t.classList.remove('dragging');
   }
-})('.window>.title-bar', '.window', document.body);
+})('.window:not(.maximized)>.title-bar', '.window', document.body);
 
 new (class extends HTMLResizeDraggableHandler {
   dragStart(e: Pointer, target: HTMLElement, oTarget: HTMLElement) {

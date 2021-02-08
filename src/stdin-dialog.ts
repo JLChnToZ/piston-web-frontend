@@ -22,6 +22,7 @@ export class StdinDialog extends DialogWindow {
     super({
       titleText: 'Edit STDIN',
       closeButton: true,
+      minimizeButton: true,
       maximizeButton: true,
       resizable: true,
     });

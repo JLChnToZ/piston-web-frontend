@@ -11,6 +11,7 @@ export class ResultDialog extends DialogWindow {
     super({
       titleText: 'Execution Result',
       closeButton: true,
+      minimizeButton: true,
       maximizeButton: true,
       resizable: true,
     });
