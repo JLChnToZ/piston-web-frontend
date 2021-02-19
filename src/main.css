@@ -6,7 +6,9 @@
   background-color: navy;
   color: white;
 }
-
+:focus {
+  outline: dotted 1px #FFF8;
+}
 html, body {
   width: 100%;
   height: 100%;
@@ -72,52 +74,68 @@ nav.flex.window>* {
   position: absolute;
   z-index: 10;
 }
-.window:not(.maximized)>.resize-handle.dir-ne,
-.window:not(.maximized)>.resize-handle.dir-se,
-.window:not(.maximized)>.resize-handle.dir-nw,
-.window:not(.maximized)>.resize-handle.dir-sw {
+.window.maximized>.resize-handle,
+.window.minimized>.resize-handle {
+  display: none;
+}
+.window>.resize-handle.dir-ne,
+.window>.resize-handle.dir-se,
+.window>.resize-handle.dir-nw,
+.window>.resize-handle.dir-sw {
   z-index: 15;
 }
-.window:not(.maximized)>.resize-handle.dir-e, .window:not(.maximized)>.resize-handle.dir-w {
+.window>.resize-handle.dir-e,
+.window>.resize-handle.dir-w {
   cursor: ew-resize;
   height: 100%;
 }
-.window:not(.maximized)>.resize-handle.dir-n, .window:not(.maximized)>.resize-handle.dir-s {
+.window>.resize-handle.dir-n,
+.window>.resize-handle.dir-s {
   cursor: ns-resize;
   width: 100%;
 }
-.window:not(.maximized)>.resize-handle.dir-ne, .window:not(.maximized)>.resize-handle.dir-sw {
+.window>.resize-handle.dir-ne,
+.window>.resize-handle.dir-sw {
   cursor: nesw-resize;
 }
-.window:not(.maximized)>.resize-handle.dir-nw, .window:not(.maximized)>.resize-handle.dir-se {
+.window>.resize-handle.dir-nw,
+.window>.resize-handle.dir-se {
   cursor: nwse-resize;
 }
-.window:not(.maximized)>.resize-handle.dir-e, .window:not(.maximized)>.resize-handle.dir-ne, .window:not(.maximized)>.resize-handle.dir-se {
+.window>.resize-handle.dir-e,
+.window>.resize-handle.dir-ne,
+.window>.resize-handle.dir-se {
   right: 0;
 }
-.window:not(.maximized)>.resize-handle.dir-w, .window:not(.maximized)>.resize-handle.dir-nw, .window:not(.maximized)>.resize-handle.dir-sw {
+.window>.resize-handle.dir-w,
+.window>.resize-handle.dir-nw,
+.window>.resize-handle.dir-sw {
   left: 0;
 }
-.window:not(.maximized)>.resize-handle.dir-n, .window:not(.maximized)>.resize-handle.dir-ne, .window:not(.maximized)>.resize-handle.dir-nw {
+.window>.resize-handle.dir-n,
+.window>.resize-handle.dir-ne,
+.window>.resize-handle.dir-nw {
   top: 0;
 }
-.window:not(.maximized)>.resize-handle.dir-s, .window:not(.maximized)>.resize-handle.dir-se, .window:not(.maximized)>.resize-handle.dir-sw {
+.window>.resize-handle.dir-s,
+.window>.resize-handle.dir-se,
+.window>.resize-handle.dir-sw {
   bottom: 0;
 }
-.window:not(.maximized)>.resize-handle.dir-e,
-.window:not(.maximized)>.resize-handle.dir-ne,
-.window:not(.maximized)>.resize-handle.dir-se,
-.window:not(.maximized)>.resize-handle.dir-w,
-.window:not(.maximized)>.resize-handle.dir-nw,
-.window:not(.maximized)>.resize-handle.dir-sw {
+.window>.resize-handle.dir-e,
+.window>.resize-handle.dir-ne,
+.window>.resize-handle.dir-se,
+.window>.resize-handle.dir-w,
+.window>.resize-handle.dir-nw,
+.window>.resize-handle.dir-sw {
   width: 5px;
 }
-.window:not(.maximized)>.resize-handle.dir-n,
-.window:not(.maximized)>.resize-handle.dir-ne,
-.window:not(.maximized)>.resize-handle.dir-nw,
-.window:not(.maximized)>.resize-handle.dir-s,
-.window:not(.maximized)>.resize-handle.dir-se,
-.window:not(.maximized)>.resize-handle.dir-sw {
+.window>.resize-handle.dir-n,
+.window>.resize-handle.dir-ne,
+.window>.resize-handle.dir-nw,
+.window>.resize-handle.dir-s,
+.window>.resize-handle.dir-se,
+.window>.resize-handle.dir-sw {
   height: 5px;
 }
 
@@ -186,6 +204,9 @@ samp, pre, code, .monospace {
 }
 
 @media (prefers-reduced-motion) {
+  :focus {
+    outline-color: #FFF8;
+  }
   .window:not(.dragging) {
     transition: none;
   }

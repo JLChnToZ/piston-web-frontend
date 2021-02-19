@@ -10,12 +10,20 @@ export interface DraggingState<T extends Element> {
   maxY?: number;
 }
 
-const enum ResizeDirection {
-  unknown, n, ne, e, se, s, sw, w, nw,
+const enum Direction {
+  none = 0x0,
+  top = 0x1,
+  right = 0x2,
+  left = 0x4,
+  bottom = 0x8,
+  topleft = Direction.top | Direction.left,
+  topright = Direction.top | Direction.right,
+  bottomleft = Direction.bottom | Direction.left,
+  bottomright = Direction.bottom | Direction.right,
 }
 
 interface ResizeState extends DraggingState<HTMLElement> {
-  d: ResizeDirection;
+  d: Direction;
   rx: number;
   ry: number;
 }
@@ -184,70 +192,55 @@ export class HTMLDraggableHandler extends AbstractDraggableHandler<HTMLElement> 
 export class HTMLResizeDraggableHandler extends HTMLDraggableHandler {
   protected dragStart(e: Pointer, target: HTMLElement, dragTarget: HTMLElement) {
     const state = super.dragStart(e, target) as ResizeState;
-    const { width, height } = target.getBoundingClientRect();
+    const style = getComputedStyle(target);
     if (dragTarget.classList.contains('dir-n'))
-      state.d = ResizeDirection.n;
+      state.d = Direction.top;
     else if (dragTarget.classList.contains('dir-e'))
-      state.d = ResizeDirection.e;
+      state.d = Direction.right;
     else if (dragTarget.classList.contains('dir-s'))
-      state.d = ResizeDirection.s;
+      state.d = Direction.bottom;
     else if (dragTarget.classList.contains('dir-w'))
-      state.d = ResizeDirection.w;
+      state.d = Direction.left;
     else if (dragTarget.classList.contains('dir-ne'))
-      state.d = ResizeDirection.ne;
+      state.d = Direction.topright;
     else if (dragTarget.classList.contains('dir-nw'))
-      state.d = ResizeDirection.nw;
+      state.d = Direction.topleft;
     else if (dragTarget.classList.contains('dir-se'))
-      state.d = ResizeDirection.se;
+      state.d = Direction.bottomright;
     else if (dragTarget.classList.contains('dir-sw'))
-      state.d = ResizeDirection.sw;
-    switch (state.d) {
-      case ResizeDirection.w: case ResizeDirection.nw: case ResizeDirection.sw:
-        state.rx = width + e.clientX;
-        break;
-      case ResizeDirection.e: case ResizeDirection.ne: case ResizeDirection.se:
-        state.rx = width - e.clientX;
-        break;
+      state.d = Direction.bottomleft;
+    if (state.d & Direction.left) {
+      const width = parseFloat(style.width);
+      state.maxX = e.clientX - state.x + width;
+      state.rx = width + e.clientX;
+    } else {
+      state.minX = state.maxX = e.clientX - state.x;
+      if (state.d & Direction.right)
+        state.rx = parseFloat(style.width) - e.clientX;
     }
-    switch (state.d) {
-      case ResizeDirection.n: case ResizeDirection.ne: case ResizeDirection.nw:
-        state.ry = height + e.clientY;
-        break;
-      case ResizeDirection.s: case ResizeDirection.se: case ResizeDirection.sw:
-        state.ry = height - e.clientY;
-        break;
-    }
-    switch (state.d) {
-      case ResizeDirection.n: case ResizeDirection.s:
-      case ResizeDirection.e: case ResizeDirection.se: case ResizeDirection.ne:
-        state.minX = state.maxX = e.clientX - state.x; break;
-    }
-    switch (state.d) {
-      case ResizeDirection.e: case ResizeDirection.w:
-      case ResizeDirection.s: case ResizeDirection.se: case ResizeDirection.sw:
-        state.minY = state.maxY = e.clientY - state.y; break;
+    if (state.d & Direction.top) {
+      const height = parseFloat(style.height);
+      state.maxY = e.clientY - state.y + height;
+      state.ry = parseFloat(style.height) + e.clientY;
+    } else {
+      state.minY = state.maxY = e.clientY - state.y;
+      if (state.d & Direction.bottom)
+        state.ry = parseFloat(style.height) - e.clientY;
     }
     return state;
   }
 
   protected dragHandle(e: Pointer, state: DraggingState<HTMLElement>)  {
     super.dragHandle(e, state);
-    switch ((state as ResizeState).d) {
-      case ResizeDirection.w: case ResizeDirection.nw: case ResizeDirection.sw:
-        state.t.style.width = `${(state as ResizeState).rx - e.clientX}px`;
-        break;
-      case ResizeDirection.e: case ResizeDirection.ne: case ResizeDirection.se:
-        state.t.style.width = `${(state as ResizeState).rx + e.clientX}px`;
-        break;
-    }
-    switch ((state as ResizeState).d) {
-      case ResizeDirection.n: case ResizeDirection.ne: case ResizeDirection.nw:
-        state.t.style.height = `${(state as ResizeState).ry - e.clientY}px`;
-        break;
-      case ResizeDirection.s: case ResizeDirection.se: case ResizeDirection.sw:
-        state.t.style.height = `${(state as ResizeState).ry + e.clientY}px`;
-        break;
-    }
+    const { d, t, rx, ry } = state as ResizeState;
+    if (d & Direction.left)
+      t.style.width = `${rx - e.clientX}px`;
+    else if (d & Direction.right)
+      t.style.width = `${rx + e.clientX}px`;
+    if (d & Direction.top)
+      t.style.height = `${ry - e.clientY}px`;
+    else if (d & Direction.bottom)
+      t.style.height = `${ry + e.clientY}px`;
   }
 }
 
