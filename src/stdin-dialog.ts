@@ -59,8 +59,10 @@ export class StdinDialog extends DialogWindow {
   }
 
   showAndWait(value?: string) {
-    if (this.resolve)
+    if (this.resolve) {
+      this.focus();
       return Promise.reject(new Error('Dialog already opened'));
+    }
     return new Promise<string | undefined>(resolve => {
       this.value = value;
       this.show();

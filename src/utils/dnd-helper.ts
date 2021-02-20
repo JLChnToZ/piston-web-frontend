@@ -149,8 +149,10 @@ export abstract class AbstractDraggableHandler<T extends Element, S extends Drag
 }
 
 export class HTMLDraggableHandler extends AbstractDraggableHandler<HTMLElement> {
-  static getTransformOffset(element: HTMLElement) {
-    const matrixMatch = getComputedStyle(element).transform.match(/matrix(3d)?\((.+)\)/);
+  static getTransformOffset(elementOrStyle: HTMLElement | CSSStyleDeclaration) {
+    if (!(elementOrStyle instanceof CSSStyleDeclaration))
+      elementOrStyle = getComputedStyle(elementOrStyle);
+    const matrixMatch = elementOrStyle.transform.match(/matrix(3d)?\((.+)\)/);
     if (matrixMatch == null) return [0, 0, 0];
     const v = matrixMatch[2].split(',');
     if (matrixMatch[1] === '3d')

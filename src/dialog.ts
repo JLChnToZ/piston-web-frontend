@@ -8,6 +8,8 @@ export interface DialogWindowOptions {
   maximizeButton?: boolean;
   minimizeButton?: boolean;
   resizable?: boolean;
+  x?: number;
+  y?: number;
 }
 
 const onScreenDialogs = new Map<HTMLElement, DialogWindow>();
@@ -28,6 +30,8 @@ export abstract class DialogWindow {
   private _h?: number;
 
   constructor(options: DialogWindowOptions = { closeButton: true }) {
+    if (options.x != null) this._x = options.x;
+    if (options.y != null) this._y = options.y;
     this.dialog = h('div.window.flex.vertical.floating.hidden',
       this.titleElement = h('div.title-bar.fixed', { ondblclick: () => this.maximizeClick() },
         this.titleTextElement = h('div.title-bar-text',
@@ -86,6 +90,7 @@ export abstract class DialogWindow {
       classList.remove('hidden');
     }
     this.focus();
+    this.restore(true);
     onScreenDialogs.set(this.dialog, this);
   }
 
@@ -114,44 +119,95 @@ export abstract class DialogWindow {
   }
 
   protected minimizeClick() {
-    const [x, y] = HTMLDraggableHandler.getTransformOffset(this.dialog);
-    const { width, height } = this.dialog.getBoundingClientRect();
-    const isMinimized = this.dialog.classList.toggle('minimized');
-    const isMaximized = this.dialog.classList.contains('maximized');
-    if (isMinimized) this.maximizeButton?.setAttribute('aria-label', 'Maximize');
-    this.minimizeButton?.setAttribute('aria-label', isMinimized ? 'Restore' : 'Minimize');
-    if (!isMinimized && !isMaximized) {
-      if (this._w != null) this.dialog.style.width = `${this._w}px`;
-      if (this._h != null) this.dialog.style.height = `${this._h}px`;
-      HTMLDraggableHandler.setTransformOffset(this.dialog, this._x ?? 0, this._y ?? 0);
-    } else if (isMinimized) {
-      this.dialog.classList.remove('maximized');
-      this._w = width;
-      this._h = height;
-      this._x = x;
-      this._y = y;
-      HTMLDraggableHandler.setTransformOffset(this.dialog, 0, 0);
-    }
+    if (this.dialog.classList.contains('minimized'))
+      this.restore();
+    else
+      this.minimize();
   }
 
   protected maximizeClick() {
-    const { width, height } = this.dialog.getBoundingClientRect();
-    const isMaximized = this.dialog.classList.toggle('maximized');
-    const isMinimized = this.dialog.classList.contains('minimized');
-    if (isMaximized) this.minimizeButton?.setAttribute('aria-label', 'Minimize');
-    this.maximizeButton?.setAttribute('aria-label', isMaximized ? 'Restore' : 'Maximize');
-    if (!isMinimized && !isMaximized) {
-      if (this._w != null) this.dialog.style.width = `${this._w}px`;
-      if (this._h != null) this.dialog.style.height = `${this._h}px`;
-    } else if (isMaximized) {
-      this.dialog.classList.remove('minimized');
-      this._w = width;
-      this._h = height;
+    if (this.dialog.classList.contains('maximized'))
+      this.restore();
+    else
+      this.maximize();
+  }
+
+  private recordPosition() {
+    const style = getComputedStyle(this.dialog);
+    this._w = parseFloat(style.width);
+    this._h = parseFloat(style.height);
+    const offset = HTMLDraggableHandler.getTransformOffset(style);
+    this._x = offset[0];
+    this._y = offset[1];
+  }
+
+  maximize() {
+    const { classList } = this.dialog;
+    if (classList.contains('maximized'))
+      return false;
+    if (classList.contains('minimized'))
+      classList.remove('minimized');
+    else
+      this.recordPosition();
+    this.minimizeButton?.setAttribute('aria-label', 'Minimize');
+    this.maximizeButton?.setAttribute('aria-label', 'Restore');
+    classList.add('maximized');
+    return true;
+  }
+
+  minimize() {
+    const { classList } = this.dialog;
+    if (classList.contains('minimized'))
+      return false;
+    if (classList.contains('maximized'))
+      classList.remove('maximized');
+    else
+      this.recordPosition();
+    this.minimizeButton?.setAttribute('aria-label', 'Restore');
+    this.maximizeButton?.setAttribute('aria-label', 'Maximize');
+    classList.add('minimized');
+    return true;
+  }
+
+  restore(positionOnly?: boolean) {
+    const { classList } = this.dialog;
+    const isMinimized = classList.contains('minimized');
+    const isMaximized = classList.contains('maximized');
+    if (positionOnly ? isMinimized || isMaximized : isMinimized === isMaximized)
+      return false;
+    this.minimizeButton?.setAttribute('aria-label', 'Minimize');
+    this.maximizeButton?.setAttribute('aria-label', 'Maximize');
+    classList.remove('maximized', 'minimized');
+    if (this._w != null) this.dialog.style.width = `${this._w}px`;
+    if (this._h != null) this.dialog.style.height = `${this._h}px`;
+    let x = this._x;
+    let y = this._y;
+    if (x == null || y == null) {
+      const rect = this.dialog.parentElement?.getBoundingClientRect();
+      if (rect) {
+        if (x == null) x = rect.left + (rect.width - (this._w ?? rect.width / 2)) / 2;
+        if (y == null) y = rect.top + (rect.height - (this._h ?? rect.height / 2)) / 2;
+      } else {
+        if (x == null) x = 0;
+        if (y == null) y = 0;
+      }
     }
+    HTMLDraggableHandler.setTransformOffset(this.dialog, x, y);
+    return true;
+  }
+
+  resetStoredPosition(x?: number | null, y?: number | null, w?: number | null, h?: number | null) {
+    if (x !== null) this._x = x ?? undefined;
+    if (y !== null) this._y = y ?? undefined;
+    if (w !== null) this._w = w ?? undefined;
+    if (h !== null) this._h = h ?? undefined;
   }
 
   close() {
-    this.dialog.classList.add('hidden');
+    const { classList } = this.dialog;
+    if (!classList.contains('minimized') && !classList.contains('minimized'))
+      this.recordPosition();
+    classList.add('hidden');
     onScreenDialogs.delete(this.dialog);
     this.isFocused = false;
     let maxZIndex = Number.NEGATIVE_INFINITY;

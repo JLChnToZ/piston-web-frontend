@@ -133,7 +133,7 @@ function save() {
 }
 
 function editStdin() {
-  stdinDialog.showAndWait(stdin).then(newValue => stdin = newValue);
+  stdinDialog.showAndWait(stdin).then(newValue => stdin = newValue, () => {});
 }
 
 function execute() {
