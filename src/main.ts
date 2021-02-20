@@ -5,7 +5,7 @@ import { ajax, AjaxError } from 'rxjs/ajax';
 import { editor as Editor, KeyCode, KeyMod, languages as Languages } from 'monaco-editor';
 import stringArgv from 'string-argv';
 import { PistonExecuteRequest, PistonExecuteResponse, PistonVersions } from './schema';
-import { blob2Text, observeMediaQuery } from './utils/helpers';
+import { blob2Text, observeFontLoad, observeMediaQuery } from './utils/helpers';
 import { StdinDialog } from './stdin-dialog';
 import { ResultDialog } from './result-dialog';
 
@@ -253,3 +253,6 @@ document.addEventListener('contextmenu', e => {
     !e.target.matches('textarea:not(:disabled), input:not(:disabled), [contenteditable], [contenteditable] *'))
     e.preventDefault();
 });
+
+if (document.fonts)
+  observeFontLoad('1em "TypoPRO Mononoki"').subscribe(() => Editor.remeasureFonts());

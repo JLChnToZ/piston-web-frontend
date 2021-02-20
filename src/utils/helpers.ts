@@ -1,5 +1,5 @@
 import { concat, fromEvent, Observable } from 'rxjs';
-import { pluck, shareReplay } from 'rxjs/operators';
+import { filter, map, pluck, shareReplay, take } from 'rxjs/operators';
 
 export const emptyArray = Object.freeze({
   length: 0,
@@ -19,6 +19,16 @@ export function observeMediaQuery(query: string) {
     ).pipe(shareReplay(1)));
   }
   return observable;
+}
+
+export function observeFontLoad(font: string, text?: string) {
+  const { fonts } = document;
+  return concat(
+    [fonts.check(font, text)],
+    fromEvent<FontFaceSetLoadEvent>(fonts, 'loadingdone').pipe(
+      map(() => fonts.check(font, text)),
+    ),
+  ).pipe(filter(isTruely), take(1), shareReplay(1));
 }
 
 export function delay(duration: number): Promise<void>;
@@ -93,6 +103,10 @@ export function interceptEvent(e: Event) {
   if(e.cancelable && !e.defaultPrevented)
     e.preventDefault();
   e.stopPropagation();
+}
+
+export function isTruely<T>(x: T): x is Exclude<T, 0 | null | undefined | false | ""> {
+  return !!x;
 }
 
 let lastId = Date.now();

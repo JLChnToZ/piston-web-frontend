@@ -15,6 +15,7 @@
   ],
   "dependencies": {
     "98.css": "latest",
+    "@types/css-font-loading-module": "^0.0.4",
     "@types/hyperscript": "latest",
     "@types/i18next": "latest",
     "@types/node": "latest",
