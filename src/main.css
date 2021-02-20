@@ -239,6 +239,7 @@ samp, pre, code, .monospace {
 img.icon {
   margin: -.2em .2em;
   max-height: 16px;
+  pointer-events: none;
 }
 
 .title-bar-text>img.icon:first-child {
@@ -247,6 +248,15 @@ img.icon {
 
 button:disabled * {
   filter: contrast(0) drop-shadow(1px 1px 0 #FFF);
+}
+
+button.icononly {
+  padding: 2px;
+  min-width: 16px;
+}
+
+button.icononly:not(:disabled):active {
+  padding: 2px 1px 0 3px;
 }
 
 .window-body label {

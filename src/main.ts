@@ -168,13 +168,13 @@ async function loadHandle(file: File) {
 }
 
 container.appendChild(h('nav.window.flex',
-  h('button.fixed', { type: 'reset', onclick: clear, title: 'Clear everything' }, 'New'),
-  h('button.fixed', { type: 'button', onclick: load, title: 'Open from your computer' }, 'Open'),
-  h('button.fixed', { type: 'button', onclick: save, title: 'Download and save your works' }, 'Save'),
+  h('button.fixed.icononly', { type: 'reset', onclick: clear, title: 'Clear everything' }, h('img.icon', { src: require('../assets/file_set-1.png') })),
+  h('button.fixed.icononly', { type: 'button', onclick: load, title: 'Open from your computer' }, h('img.icon', { src: require('../assets/directory_open_cool-4.png') })),
+  h('button.fixed.icononly', { type: 'button', onclick: save, title: 'Download and save your works' }, h('img.icon', { src: require('../assets/download.png') })),
   languageSelector,
   argsInput,
-  h('button.fixed', { type: 'button', onclick: editStdin, title: 'Edit STDIN' }, 'STDIN...'),
-  h('button.fixed', { type: 'submit', title: 'Execute' }, 'Run'),
+  h('button.fixed.icononly', { type: 'button', onclick: editStdin, title: 'Edit Input (STDIN)' }, h('img.icon', { src: require('../assets/keyboard-6.png') })),
+  h('button.fixed.icononly', { type: 'submit', title: 'Execute' }, h('img.icon', { src: require('../assets/logo.png') })),
 ));
 
 container.addEventListener('submit', async e => {

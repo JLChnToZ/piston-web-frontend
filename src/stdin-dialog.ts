@@ -24,8 +24,8 @@ export class StdinDialog extends DialogWindow {
   
   constructor() {
     super({
-      iconPath: require('../assets/notepad-3.png'),
-      titleText: 'Edit STDIN',
+      iconPath: require('../assets/keyboard-6.png'),
+      titleText: 'Edit Input (STDIN)',
       closeButton: true,
       minimizeButton: true,
       maximizeButton: true,

@@ -9,7 +9,7 @@ export class ResultDialog extends DialogWindow {
 
   constructor() {
     super({
-      iconPath: require('../assets/executable_script-0.png'),
+      iconPath: require('../assets/logo.png'),
       titleText: 'Execution Result',
       closeButton: true,
       minimizeButton: true,
