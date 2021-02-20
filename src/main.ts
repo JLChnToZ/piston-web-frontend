@@ -247,3 +247,9 @@ observeMediaQuery('(prefers-color-scheme:dark)').subscribe(matches => {
   }
 })();
 editor.focus();
+
+document.addEventListener('contextmenu', e => {
+  if (!(e.target instanceof Element) ||
+    !e.target.matches('textarea:not(:disabled), input:not(:disabled), [contenteditable], [contenteditable] *'))
+    e.preventDefault();
+});

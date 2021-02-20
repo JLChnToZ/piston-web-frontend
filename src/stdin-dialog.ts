@@ -2,16 +2,20 @@ import h from 'hyperscript';
 import { editor as Editor } from 'monaco-editor';
 import { Subscription } from 'rxjs';
 import { DialogWindow } from './dialog';
-import { observeMediaQuery } from './utils/helpers';
+import { generateUid, observeMediaQuery } from './utils/helpers';
 
 export class StdinDialog extends DialogWindow {
   editor: Editor.IStandaloneCodeEditor;
   protected ogValue?: string;
   protected resolve?: (value: string | undefined) => void;
   protected darkModeSub: Subscription;
+  protected eolCheckbox: HTMLInputElement;
 
   get value() {
-    return this.editor.getModel()?.getValue(Editor.EndOfLinePreference.LF);
+    return this.editor.getModel()?.getValue(this.eolCheckbox.checked ?
+      Editor.EndOfLinePreference.CRLF :
+      Editor.EndOfLinePreference.LF,
+    );
   }
   set value(value: string | undefined) {
     this.ogValue = value;
@@ -20,6 +24,7 @@ export class StdinDialog extends DialogWindow {
   
   constructor() {
     super({
+      iconPath: require('../assets/notepad-3.png'),
       titleText: 'Edit STDIN',
       closeButton: true,
       minimizeButton: true,
@@ -39,10 +44,15 @@ export class StdinDialog extends DialogWindow {
       folding: true,
       fontFamily: 'TypoPRO Mononoki',
     });
-    this.bodyElement.classList.remove('expand');
-    this.bodyElement.classList.add('fixed', 'field-row', 'align-right');
-    this.bodyElement.appendChild(h('button', { type: 'button', onclick: () => this.applyClick() }, 'Apply'))
-    this.bodyElement.appendChild(h('button', { type: 'button', onclick: () => this.close() }, 'Cancel'));
+    const { classList } = this.bodyElement;
+    classList.remove('expand');
+    classList.add('fixed', 'field-row', 'align-right');
+    this.bodyElement.append(
+      this.eolCheckbox = h('input', { type: 'checkbox', id: generateUid('checkbox_'), checked: true }),
+      h('label', { htmlFor: this.eolCheckbox.id }, 'Break Line Using CRLF'),
+      h('button', { type: 'button', onclick: () => this.applyClick() }, 'Apply'),
+      h('button', { type: 'button', onclick: () => this.close() }, 'Cancel'),
+    );
     this.darkModeSub = observeMediaQuery('(prefers-color-scheme:dark)').subscribe(
       isDarkMode => this.editor.updateOptions({ theme: isDarkMode ? 'vs-dark' : 'vs' }),
     );

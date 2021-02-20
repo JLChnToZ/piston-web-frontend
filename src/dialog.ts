@@ -2,6 +2,7 @@ import h from 'hyperscript';
 import { DraggingState, HTMLDraggableHandler, HTMLResizeDraggableHandler, Pointer } from './utils/dnd-helper';
 
 export interface DialogWindowOptions {
+  iconPath?: string,
   titleText?: string | Node,
   closeButton?: boolean;
   maximizeButton?: boolean;
@@ -16,6 +17,7 @@ export abstract class DialogWindow {
   titleElement: HTMLDivElement;
   titleTextElement: HTMLDivElement;
   bodyElement: HTMLDivElement;
+  icon?: HTMLImageElement;
   maximizeButton?: HTMLButtonElement;
   minimizeButton?: HTMLButtonElement;
   closeButton?: HTMLButtonElement;
@@ -28,7 +30,12 @@ export abstract class DialogWindow {
   constructor(options: DialogWindowOptions = { closeButton: true }) {
     this.dialog = h('div.window.flex.vertical.floating.hidden',
       this.titleElement = h('div.title-bar.fixed', { ondblclick: () => this.maximizeClick() },
-        this.titleTextElement = h('div.title-bar-text', options.titleText),
+        this.titleTextElement = h('div.title-bar-text',
+          options.iconPath ? this.icon = h<HTMLImageElement>('img.icon', {
+            src: options.iconPath, ondblclick: () => this.close(),
+          }) : undefined,
+          options.titleText,
+        ),
         h('div.title-bar-controls',
           options.minimizeButton ? (this.minimizeButton = h('button', {
             attrs: { 'aria-label': 'Minimize' },
@@ -83,17 +90,26 @@ export abstract class DialogWindow {
   }
 
   focus() {
-    let maxZIndex = 0;
+    const dialogs: HTMLElement[] = [];
+    const zOrderMapping = new WeakMap<HTMLElement, number>();
     for (const handler of onScreenDialogs.values()) {
       if (handler === this) continue;
       const { dialog } = handler;
-      if (dialog.classList.contains('hidden'))
+      if (dialog.classList.contains('hidden') || zOrderMapping.has(dialog))
         continue;
       handler.blur();
-      maxZIndex = Math.max(Number(dialog.style.zIndex) || 0, maxZIndex);
+      dialogs.push(dialog);
+      zOrderMapping.set(dialog, Number(dialog.style.zIndex));
     }
-    if (Number(this.dialog.style.zIndex || 0) < maxZIndex)
-      this.dialog.style.zIndex = (maxZIndex + 1).toString();
+    dialogs.sort((lhs, rhs) => {
+      const lz = zOrderMapping.get(lhs) ?? Number(lhs.style.zIndex);
+      const rz = zOrderMapping.get(rhs) ?? Number(rhs.style.zIndex);
+      return lz > rz ? 1 : lz < rz ? -1 : 0;
+    });
+    dialogs.push(this.dialog);
+    dialogs.forEach(({ style }, index) =>
+      style.zIndex = (index + 1).toString(10),
+    );
     if (!this.isFocused) this.onfocus();
   }
 

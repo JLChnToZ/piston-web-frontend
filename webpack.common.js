@@ -39,6 +39,7 @@ module.exports = merge({
   output: {
     path: path.join(__dirname, 'docs'),
     filename: '[name].[contenthash].js',
+    assetModuleFilename: 'assets/[hash][ext][query]',
   },
   resolve: {
     extensions: ['.ts', '.js']
@@ -71,13 +72,7 @@ module.exports = merge({
       }],
     }, {
       test: /\.(mp3|svg|png|jpe?g|eot|ttf|woff|woff2)$/,
-      use: [{
-        loader: 'file-loader',
-        options: {
-          outputPath: 'assets',
-          name: '[sha256:hash:base64:16].[ext]',
-        },
-      }],
+      type: 'asset/resource',
     }],
   },
 });

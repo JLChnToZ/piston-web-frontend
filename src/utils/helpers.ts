@@ -94,3 +94,10 @@ export function interceptEvent(e: Event) {
     e.preventDefault();
   e.stopPropagation();
 }
+
+let lastId = Date.now();
+
+export function generateUid(prefix: string = '') {
+  const now = Date.now();
+  return prefix + (now > lastId ? now : ++lastId).toString(36);
+}
