@@ -15,6 +15,7 @@ let stdin: string | undefined;
 const languageMap = new Map<string, string>(Object.entries({
   bash: 'shell',
   c: 'c',
+  clojure: 'clojure',
   cpp: 'cpp',
   csharp: 'csharp',
   go: 'go',
@@ -29,6 +30,7 @@ const languageMap = new Map<string, string>(Object.entries({
   python3: 'python',
   ruby: 'ruby',
   rust: 'rust',
+  scala: 'scala',
   swift: 'swift',
   typescript: 'typescript',
 }));
@@ -227,7 +229,7 @@ observeMediaQuery('(prefers-color-scheme:dark)').subscribe(matches => {
     frag.appendChild(h('option', {
       value: entry.name,
       selected: currentLanguage === entry.name,
-    }, `${entry.name} (v${entry.version})`));
+    }, `${entry.name} (v${entry.version || '???'})`));
     const lang = languageMap.get(entry.name);
     if (lang) supportedLangs.add(lang);
   }
