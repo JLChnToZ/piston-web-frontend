@@ -14,6 +14,10 @@ let currentLanguage = 'node';
 let stdin: string | undefined;
 const languageMap = new Map<string, string>(Object.entries({
   bash: 'shell',
+  'csharp.net': 'csharp',
+  'fsharp.net': 'fsharp',
+  'basic.net': 'vb',
+  'sqlite3': 'sql',
   node: 'javascript',
   python2: 'python',
   python3: 'python',
