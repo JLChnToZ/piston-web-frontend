@@ -2,7 +2,7 @@
 import h from 'hyperscript';
 import { lastValueFrom } from 'rxjs';
 import { ajax, AjaxError } from 'rxjs/ajax';
-import { editor as Editor, KeyCode, KeyMod, languages as Languages } from 'monaco-editor';
+import { editor as Editor, KeyCode, KeyMod, languages, languages as Languages } from 'monaco-editor';
 import stringArgv from 'string-argv';
 import { PistonExecuteRequest, PistonExecuteResponse, PistonVersions } from './schema';
 import { blob2Text, observeFontLoad, observeMediaQuery } from './utils/helpers';
@@ -14,31 +14,22 @@ let currentLanguage = 'node';
 let stdin: string | undefined;
 const languageMap = new Map<string, string>(Object.entries({
   bash: 'shell',
-  c: 'c',
-  clojure: 'clojure',
-  cpp: 'cpp',
-  csharp: 'csharp',
-  go: 'go',
-  java: 'java',
-  julia: 'julia',
-  kotlin: 'kotlin',
-  lua: 'lua',
   node: 'javascript',
-  javascript: 'javascript',
-  perl: 'perl',
-  php: 'php',
-  python: 'python',
   python2: 'python',
   python3: 'python',
-  ruby: 'ruby',
-  rust: 'rust',
-  scala: 'scala',
-  swift: 'swift',
-  typescript: 'typescript',
 }));
 const langInfoMap = new Map<string, Languages.ILanguageExtensionPoint>();
 const extMap = new Map<string, string>();
 const mimeMap = new Map<string, string>();
+
+for (const lang of languages.getLanguages()) {
+  if (!languageMap.has(lang.id))
+    languageMap.set(lang.id, lang.id);
+  if (lang.aliases)
+    for (const alias of lang.aliases)
+      if (!languageMap.has(alias))
+        languageMap.set(alias, lang.id);
+}
 
 const container = document.body.appendChild(h<HTMLFormElement>('form.filled.flex.vertical'));
 

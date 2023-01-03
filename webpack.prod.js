@@ -32,7 +32,7 @@ module.exports = merge(common, {
           },
         },
         extractComments: {
-          condition: 'some',
+          condition: false,
           filename: () => `LICENSE.txt`,
           banner: licenseFile => `License information can be found in ${licenseFile}.`,
         },
