@@ -1,6 +1,6 @@
 // import './monaco-env';
 import h from 'hyperscript';
-import 'rxjs';
+import { lastValueFrom } from 'rxjs';
 import { ajax, AjaxError } from 'rxjs/ajax';
 import { editor as Editor, KeyCode, KeyMod, languages as Languages } from 'monaco-editor';
 import stringArgv from 'string-argv';
@@ -24,8 +24,10 @@ const languageMap = new Map<string, string>(Object.entries({
   kotlin: 'kotlin',
   lua: 'lua',
   node: 'javascript',
+  javascript: 'javascript',
   perl: 'perl',
   php: 'php',
+  python: 'python',
   python2: 'python',
   python3: 'python',
   ruby: 'ruby',
@@ -60,19 +62,19 @@ editor.addAction({
 editor.addAction({
   id: 'new',
   label: 'Clear',
-  keybindings: [KeyMod.CtrlCmd | KeyCode.KEY_N],
+  keybindings: [KeyMod.CtrlCmd | KeyCode.KeyN],
   run: clear,
 });
 editor.addAction({
   id: 'open',
   label: 'Open',
-  keybindings: [KeyMod.CtrlCmd | KeyCode.KEY_O],
+  keybindings: [KeyMod.CtrlCmd | KeyCode.KeyO],
   run: load,
 });
 editor.addAction({
   id: 'save',
   label: 'Save',
-  keybindings: [KeyMod.CtrlCmd | KeyCode.KEY_S],
+  keybindings: [KeyMod.CtrlCmd | KeyCode.KeyS],
   run: save,
 });
 
@@ -186,7 +188,7 @@ container.addEventListener('submit', async e => {
   try {
     e.preventDefault();
     formElements.forEach(e => e.disabled = true);
-    const result: PistonExecuteResponse = (await ajax({
+    const result = (await lastValueFrom(ajax<PistonExecuteResponse>({
       method: 'POST',
       url: new URL('execute', pistonPublicURL).toString(),
       headers: { 'Content-Type': 'application/json' },
@@ -196,7 +198,7 @@ container.addEventListener('submit', async e => {
         args: stringArgv(argsInput.value),
         stdin,
       } as PistonExecuteRequest),
-    }).toPromise()).response;
+    }))).response;
     const resultDisplay = new ResultDialog();
     resultDisplay.text = result.output;
     resultDisplay.show();
@@ -222,7 +224,7 @@ observeMediaQuery('(prefers-color-scheme:dark)').subscribe(matches => {
 });
 
 (async() => {
-  const list: PistonVersions = (await ajax(new URL('versions', pistonPublicURL).toString()).toPromise()).response;
+  const list = (await lastValueFrom(ajax<PistonVersions>(new URL('versions', pistonPublicURL).toString()))).response;
   const frag = document.createDocumentFragment();
   const supportedLangs = new Set<string>();
   for (const entry of list) {
