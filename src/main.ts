@@ -9,7 +9,7 @@ import { blob2Text, observeFontLoad, observeMediaQuery } from './utils/helpers';
 import { StdinDialog } from './stdin-dialog';
 import { ResultDialog } from './result-dialog';
 
-const pistonPublicURL = (self as any).pistonPublicURL || 'https://emkc.org/api/v1/piston/';
+const pistonPublicURL = (self as any).pistonPublicURL || 'https://emkc.org/api/v2/piston/';
 let currentLanguage = 'node';
 let stdin: string | undefined;
 const languageMap = new Map<string, string>(Object.entries({
@@ -75,6 +75,8 @@ editor.addAction({
 
 const stdinDialog = new StdinDialog();
 
+const fileNameInput = h<HTMLInputElement>('input.monospace', { type: 'text', placeholder: 'file.code', spellcheck: false });
+
 const argsInput = h<HTMLInputElement>('input.expand.monospace', { type: 'text', placeholder: 'Arguments...', spellcheck: false });
 
 const languageSelector = h<HTMLSelectElement>('select.fixed', {
@@ -105,6 +107,7 @@ const fileSelect = h<HTMLInputElement>('input.hidden', {
 function clear() {
   editor.getModel()?.dispose();
   editor.setModel(Editor.createModel(''));
+  fileNameInput.value = '';
   argsInput.value = '';
   stdin = undefined;
   editor.focus();
@@ -126,7 +129,7 @@ function save() {
       ext = langInfo.extensions[0];
   }
   const href = URL.createObjectURL(new Blob([editor.getValue()], { type }));
-  h<HTMLElement>('a', { href, download: `code-${Date.now().toString(36)}${ext}` }).click();
+  h<HTMLElement>('a', { href, download: fileNameInput.value.trim() || `code-${Date.now().toString(36)}${ext}` }).click();
   setTimeout(URL.revokeObjectURL, 500, href);
   editor.focus();
 }
@@ -160,6 +163,7 @@ async function loadHandle(file: File) {
     }
     if (!sameLang && currentLanguage !== targetLang)
       languageSelector.value = currentLanguage = targetLang;
+    fileNameInput.value = file.name;
   } catch(e) {
   } finally {
     editor.focus();
@@ -171,6 +175,7 @@ container.appendChild(h('nav.window.flex',
   h('button.fixed.icononly', { type: 'button', onclick: load, title: 'Open from your computer' }, h('img.icon', { src: require('../assets/directory_open_cool-4.png') })),
   h('button.fixed.icononly', { type: 'button', onclick: save, title: 'Download and save your works' }, h('img.icon', { src: require('../assets/download.png') })),
   languageSelector,
+  fileNameInput,
   argsInput,
   h('button.fixed.icononly', { type: 'button', onclick: editStdin, title: 'Edit Input (STDIN)' }, h('img.icon', { src: require('../assets/keyboard-6.png') })),
   h('button.fixed.icononly', { type: 'submit', title: 'Execute' }, h('img.icon', { src: require('../assets/logo.png') })),
@@ -183,19 +188,29 @@ container.addEventListener('submit', async e => {
   try {
     e.preventDefault();
     formElements.forEach(e => e.disabled = true);
+    let stopwatch = performance.now();
     const result = (await lastValueFrom(ajax<PistonExecuteResponse>({
       method: 'POST',
       url: new URL('execute', pistonPublicURL).toString(),
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         language: currentLanguage,
-        source: editor.getModel()?.getValue(Editor.EndOfLinePreference.LF) || '',
+        files: [{
+          name: fileNameInput.value.trim() || undefined,
+          content: editor.getModel()?.getValue(Editor.EndOfLinePreference.LF) || '',
+        }],
         args: stringArgv(argsInput.value),
         stdin,
       } as PistonExecuteRequest),
     }))).response;
+    stopwatch = performance.now() - stopwatch;
     const resultDisplay = new ResultDialog();
-    resultDisplay.text = result.output;
+    let content: string = '';
+    if (result.compile)
+      content += `${result.compile.output}\n\Compiler exits with ${result.compile.signal || result.compile.code || 0}.\n\n`;
+    content += `${result.run.output}\n\nRunner exits with ${result.run.signal || result.run.code || 0}.\n\n`;
+    content += `Response time: ${stopwatch / 1000} seconds.`;
+    resultDisplay.text = content;
     resultDisplay.show();
   } catch (e) {
     let message = 'Unknown Error';
