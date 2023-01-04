@@ -244,7 +244,7 @@ observeMediaQuery('(prefers-color-scheme:dark)').subscribe(matches => {
     frag.appendChild(h('option', {
       value: `${entry.language}@${entry.version}`,
       selected: currentLanguage === entry.language,
-    }, `${entry.language} (v${entry.version || '???'})`));
+    }, `${entry.language} (${entry.runtime || entry.language} v${entry.version || '???'})`));
     const lang = languageMap.get(entry.language);
     if (lang) supportedLangs.add(lang);
     if (!currentVersion && currentLanguage === entry.language)
