@@ -11,6 +11,7 @@ import { ResultDialog } from './result-dialog';
 
 const pistonPublicURL = (self as any).pistonPublicURL || 'https://emkc.org/api/v2/piston/';
 let currentLanguage = 'javascript';
+let currentVersion: string = '';
 let stdin: string | undefined;
 const languageMap = new Map<string, string>(Object.entries({
   bash: 'shell',
@@ -81,11 +82,12 @@ const argsInput = h<HTMLInputElement>('input.expand.monospace', { type: 'text', 
 
 const languageSelector = h<HTMLSelectElement>('select.fixed', {
   onchange: (e: Event) => {
-    const newLanguage = (e.target as HTMLSelectElement).value;
+    const [newLanguage, version] = (e.target as HTMLSelectElement).value.split('@');
     if (currentLanguage === newLanguage)
       return;
     Editor.setModelLanguage(editor.getModel()!, languageMap.get(newLanguage) || 'plaintext');
     currentLanguage = newLanguage;
+    currentVersion = version;
     argsInput.value = '';
   },
   title: 'Language (Runtime to use)'
@@ -195,6 +197,7 @@ container.addEventListener('submit', async e => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         language: currentLanguage,
+        version: currentVersion,
         files: [{
           name: fileNameInput.value.trim() || undefined,
           content: editor.getModel()?.getValue(Editor.EndOfLinePreference.LF) || '',
@@ -239,11 +242,13 @@ observeMediaQuery('(prefers-color-scheme:dark)').subscribe(matches => {
   const supportedLangs = new Set<string>();
   for (const entry of list) {
     frag.appendChild(h('option', {
-      value: entry.language,
+      value: `${entry.language}@${entry.version}`,
       selected: currentLanguage === entry.language,
     }, `${entry.language} (v${entry.version || '???'})`));
     const lang = languageMap.get(entry.language);
     if (lang) supportedLangs.add(lang);
+    if (!currentVersion && currentLanguage === entry.language)
+      currentVersion = entry.version;
   }
   languageSelector.appendChild(frag);
   for (const lang of Languages.getLanguages()) {
