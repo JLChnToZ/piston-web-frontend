@@ -10,7 +10,7 @@ import { StdinDialog } from './stdin-dialog';
 import { ResultDialog } from './result-dialog';
 
 const pistonPublicURL = (self as any).pistonPublicURL || 'https://emkc.org/api/v2/piston/';
-let currentLanguage = 'node';
+let currentLanguage = 'javascript';
 let stdin: string | undefined;
 const languageMap = new Map<string, string>(Object.entries({
   bash: 'shell',
@@ -234,7 +234,7 @@ observeMediaQuery('(prefers-color-scheme:dark)').subscribe(matches => {
 });
 
 (async() => {
-  const list = (await lastValueFrom(ajax<PistonVersions>(new URL('versions', pistonPublicURL).toString()))).response;
+  const list = (await lastValueFrom(ajax<PistonVersions>(new URL('runtimes', pistonPublicURL).toString()))).response;
   const frag = document.createDocumentFragment();
   const supportedLangs = new Set<string>();
   for (const entry of list) {
