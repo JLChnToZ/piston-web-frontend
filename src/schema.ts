@@ -1,7 +1,7 @@
 export type PistonVersions = PistonVersion[];
 
 export interface PistonVersion {
-  name: string;
+  language: string;
   alias: string[];
   version: string;
   runtime?: string;

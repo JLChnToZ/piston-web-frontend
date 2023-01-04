@@ -239,10 +239,10 @@ observeMediaQuery('(prefers-color-scheme:dark)').subscribe(matches => {
   const supportedLangs = new Set<string>();
   for (const entry of list) {
     frag.appendChild(h('option', {
-      value: entry.name,
-      selected: currentLanguage === entry.name,
-    }, `${entry.name} (v${entry.version || '???'})`));
-    const lang = languageMap.get(entry.name);
+      value: entry.language,
+      selected: currentLanguage === entry.language,
+    }, `${entry.language} (v${entry.version || '???'})`));
+    const lang = languageMap.get(entry.language);
     if (lang) supportedLangs.add(lang);
   }
   languageSelector.appendChild(frag);
